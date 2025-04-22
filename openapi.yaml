@@ -1,0 +1,734 @@
+openapi: 3.0.3
+info:
+  title: BrowserBase API
+  description: API for managing contexts, extensions, projects, and browser sessions via BrowserBase.
+  version: "v1"
+servers:
+  - url: https://api.browserbase.com
+security:
+  - X_BB_API_Key: []
+paths:
+  /v1/contexts:
+    post:
+      summary: Create a Context
+      operationId: createContext
+      tags: [Contexts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContextCreateParams'
+      responses:
+        '201':
+          description: Context created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextCreateResponse'
+  /v1/contexts/{id}:
+    get:
+      summary: Retrieve a Context
+      operationId: retrieveContext
+      tags: [Contexts]
+      parameters:
+        - $ref: "#/components/parameters/ContextId"
+      responses:
+        '200':
+          description: Context retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Context'
+    put:
+      summary: Update a Context
+      operationId: updateContext
+      tags: [Contexts]
+      parameters:
+        - $ref: "#/components/parameters/ContextId"
+      responses:
+        '200':
+          description: Context updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContextUpdateResponse"
+  /v1/extensions:
+    post:
+      summary: Upload an Extension
+      operationId: createExtension
+      tags: [Extensions]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/ExtensionCreateParams"
+      responses:
+        '200':
+          description: Extension uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extension"
+  /v1/extensions/{id}:
+    get:
+      summary: Retrieve Extension
+      operationId: retrieveExtension
+      tags: [Extensions]
+      parameters:
+        - $ref: "#/components/parameters/ExtensionId"
+      responses:
+        '200':
+          description: Extension retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Extension"
+    delete:
+      summary: Delete Extension
+      operationId: deleteExtension
+      tags: [Extensions]
+      parameters:
+        - $ref: "#/components/parameters/ExtensionId"
+      responses:
+        '204':
+          description: Extension deleted
+  /v1/projects/{id}:
+    get:
+      summary: Retrieve Project
+      operationId: retrieveProject
+      tags: [Projects]
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        '200':
+          description: Project retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+  /v1/projects:
+    get:
+      summary: List Projects
+      operationId: listProjects
+      tags: [Projects]
+      responses:
+        '200':
+          description: List of Projects
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectListResponse"
+  /v1/projects/{id}/usage:
+    get:
+      summary: Project Usage
+      operationId: projectUsage
+      tags: [Projects]
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      responses:
+        '200':
+          description: Project usage info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectUsage"
+  /v1/sessions:
+    post:
+      summary: Create Session
+      operationId: createSession
+      tags: [Sessions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionCreateParams"
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionCreateResponse"
+    get:
+      summary: List Sessions
+      tags: [Sessions]
+      operationId: listSessions
+      parameters:
+        - name: q
+          in: query
+          description: Query sessions by user metadata
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SessionStatus"
+      responses:
+        '200':
+          description: List of Sessions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionListResponse"
+  /v1/sessions/{id}:
+    get:
+      summary: Retrieve Session
+      operationId: retrieveSession
+      tags: [Sessions]
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        '200':
+          description: Session retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionRetrieveResponse"
+    post:
+      summary: Update Session
+      operationId: updateSession
+      tags: [Sessions]
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionUpdateParams"
+      responses:
+        '200':
+          description: Session updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+  /v1/sessions/{id}/debug:
+    get:
+      summary: Get Session Live URLs
+      operationId: sessionDebug
+      tags: [Sessions]
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        '200':
+          description: URLs for debugging session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionLiveURLs"
+  /v1/sessions/{id}/downloads:
+    get:
+      summary: Session Downloads (zip)
+      operationId: listSessionDownloads
+      tags: [Sessions]
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        '200':
+          description: Downloads zip
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+  /v1/sessions/{id}/logs:
+    get:
+      summary: Session Logs
+      operationId: listSessionLogs
+      tags: [Sessions]
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        '200':
+          description: List of logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogListResponse"
+  /v1/sessions/{id}/recording:
+    get:
+      summary: Get Session Recording
+      operationId: getSessionRecording
+      tags: [Sessions]
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        '200':
+          description: Session Recording
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecordingRetrieveResponse"
+  /v1/sessions/{id}/uploads:
+    post:
+      summary: Create Session Uploads
+      operationId: createSessionUploads
+      tags: [Sessions]
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UploadCreateParams"
+      responses:
+        '200':
+          description: Upload created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadCreateResponse"
+components:
+  parameters:
+    ContextId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    ExtensionId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    ProjectId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    SessionId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    X_BB_API_Key:
+      type: apiKey
+      in: header
+      name: X-BB-API-Key
+  schemas:
+    # Contexts
+    Context:
+      type: object
+      required:
+        - id
+        - projectId
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        projectId:
+          type: string
+          description: The Project ID linked to the uploaded Context.
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+    ContextCreateParams:
+      type: object
+      required:
+        - projectId
+      properties:
+        projectId:
+          type: string
+          description: "The Project ID. Can be found in Settings."
+    ContextCreateResponse:
+      type: object
+      required:
+        - id
+        - cipherAlgorithm
+        - initializationVectorSize
+        - publicKey
+        - uploadUrl
+      properties:
+        id:
+          type: string
+        cipherAlgorithm:
+          type: string
+          description: The cipher algorithm used (AES-256-CBC).
+        initializationVectorSize:
+          type: integer
+          description: Initialization vector size.
+        publicKey:
+          type: string
+        uploadUrl:
+          type: string
+          description: Upload URL for custom user-data-directory.
+    ContextUpdateResponse:
+      allOf:
+        - $ref: "#/components/schemas/ContextCreateResponse"
+    Extension:
+      type: object
+      required:
+        - id
+        - createdAt
+        - fileName
+        - projectId
+        - updatedAt
+      properties:
+        id:
+          type: string
+        createdAt:
+          type: string
+        fileName:
+          type: string
+        projectId:
+          type: string
+        updatedAt:
+          type: string
+    ExtensionCreateParams:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+    Project:
+      type: object
+      required:
+        - id
+        - concurrency
+        - createdAt
+        - defaultTimeout
+        - name
+        - ownerId
+        - updatedAt
+      properties:
+        id:
+          type: string
+        concurrency:
+          type: integer
+          description: Max concurrent sessions
+        createdAt:
+          type: string
+        defaultTimeout:
+          type: integer
+        name:
+          type: string
+        ownerId:
+          type: string
+        updatedAt:
+          type: string
+    ProjectUsage:
+      type: object
+      required:
+        - browserMinutes
+        - proxyBytes
+      properties:
+        browserMinutes:
+          type: number
+        proxyBytes:
+          type: number
+    ProjectListResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/Project"
+    Session:
+      type: object
+      required:
+        - id
+        - createdAt
+        - expiresAt
+        - keepAlive
+        - projectId
+        - proxyBytes
+        - region
+        - startedAt
+        - status
+        - updatedAt
+      properties:
+        id: { type: string }
+        createdAt: { type: string }
+        expiresAt: { type: string }
+        keepAlive: { type: boolean, description: "Whether the session should be kept alive upon disconnections" }
+        projectId: { type: string }
+        proxyBytes: { type: number }
+        region:
+          type: string
+          enum: [us-west-2, us-east-1, eu-central-1, ap-southeast-1]
+        startedAt: { type: string }
+        status:
+          $ref: "#/components/schemas/SessionStatus"
+        updatedAt: { type: string }
+        avgCpuUsage:
+          type: number
+          nullable: true
+        contextId:
+          type: string
+          nullable: true
+        endedAt:
+          type: string
+          nullable: true
+        memoryUsage:
+          type: number
+          nullable: true
+        userMetadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+    SessionCreateResponse:
+      allOf:
+        - $ref: "#/components/schemas/Session"
+        - type: object
+          required:
+            - connectUrl
+            - seleniumRemoteUrl
+            - signingKey
+          properties:
+            connectUrl: { type: string }
+            seleniumRemoteUrl: { type: string }
+            signingKey: { type: string }
+    SessionRetrieveResponse:
+      allOf:
+        - $ref: "#/components/schemas/SessionCreateResponse"
+    SessionListResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/Session"
+    SessionStatus:
+      type: string
+      enum: [RUNNING, ERROR, TIMED_OUT, COMPLETED]
+    SessionCreateParams:
+      type: object
+      required:
+        - projectId
+      properties:
+        projectId:
+          type: string
+        browserSettings:
+          $ref: '#/components/schemas/SessionBrowserSettings'
+        extensionId:
+          type: string
+        keepAlive:
+          type: boolean
+        proxies:
+          oneOf:
+            - type: boolean
+            - type: array
+              items:
+                oneOf:
+                  - $ref: "#/components/schemas/BrowserbaseProxyConfig"
+                  - $ref: "#/components/schemas/ExternalProxyConfig"
+        region:
+          type: string
+          enum: [us-west-2, us-east-1, eu-central-1, ap-southeast-1]
+        timeout:
+          type: integer
+        userMetadata:
+          type: object
+          additionalProperties: true
+    SessionUpdateParams:
+      type: object
+      required:
+        - projectId
+        - status
+      properties:
+        projectId:
+          type: string
+        status:
+          type: string
+          enum: [REQUEST_RELEASE]
+    SessionBrowserSettings:
+      type: object
+      properties:
+        advancedStealth: { type: boolean }
+        blockAds: { type: boolean }
+        context: { $ref: "#/components/schemas/SessionBrowserSettingsContext" }
+        extensionId: { type: string }
+        fingerprint: { $ref: "#/components/schemas/SessionBrowserSettingsFingerprint" }
+        logSession: { type: boolean }
+        recordSession: { type: boolean }
+        solveCaptchas: { type: boolean }
+        viewport: { $ref: "#/components/schemas/SessionBrowserSettingsViewport" }
+    SessionBrowserSettingsContext:
+      type: object
+      required:
+        - id
+      properties:
+        id: { type: string }
+        persist: { type: boolean }
+    SessionBrowserSettingsFingerprint:
+      type: object
+      properties:
+        browsers:
+          type: array
+          items:
+            type: string
+            enum: [chrome, edge, firefox, safari]
+        devices:
+          type: array
+          items:
+            type: string
+            enum: [desktop, mobile]
+        httpVersion:
+          type: string
+          enum: ['1', '2']
+        locales:
+          type: array
+          items: { type: string }
+        operatingSystems:
+          type: array
+          items:
+            type: string
+            enum: [android, ios, linux, macos, windows]
+        screen:
+          $ref: "#/components/schemas/SessionBrowserSettingsFingerprintScreen"
+    SessionBrowserSettingsFingerprintScreen:
+      type: object
+      properties:
+        maxHeight: { type: integer }
+        maxWidth: { type: integer }
+        minHeight: { type: integer }
+        minWidth: { type: integer }
+    SessionBrowserSettingsViewport:
+      type: object
+      properties:
+        height: { type: integer }
+        width: { type: integer }
+    BrowserbaseProxyConfig:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [browserbase]
+        domainPattern: { type: string }
+        geolocation: { $ref: "#/components/schemas/Geolocation" }
+    Geolocation:
+      type: object
+      required:
+        - country
+      properties:
+        country: { type: string }
+        city: { type: string }
+        state: { type: string }
+    ExternalProxyConfig:
+      type: object
+      required:
+        - type
+        - server
+      properties:
+        type:
+          type: string
+          enum: [external]
+        server:
+          type: string
+        domainPattern: { type: string }
+        password: { type: string }
+        username: { type: string }
+    SessionLog:
+      type: object
+      required:
+        - method
+        - pageId
+        - sessionId
+      properties:
+        method: { type: string }
+        pageId: { type: integer }
+        sessionId: { type: string }
+        frameId: { type: string }
+        loaderId: { type: string }
+        request: { $ref: '#/components/schemas/SessionLogRequest' }
+        response: { $ref: '#/components/schemas/SessionLogResponse' }
+        timestamp: { type: integer }
+    SessionLogRequest:
+      type: object
+      required:
+        - params
+        - rawBody
+      properties:
+        params:
+          type: object
+          additionalProperties: true
+        rawBody: { type: string }
+        timestamp: { type: integer }
+    SessionLogResponse:
+      type: object
+      required:
+        - rawBody
+        - result
+      properties:
+        rawBody: { type: string }
+        result:
+          type: object
+          additionalProperties: true
+        timestamp: { type: integer }
+    LogListResponse:
+      type: array
+      items: { $ref: '#/components/schemas/SessionLog' }
+    SessionRecording:
+      type: object
+      required:
+        - data
+        - sessionId
+        - timestamp
+        - type
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+        sessionId: { type: string }
+        timestamp: { type: integer }
+        type: { type: integer }
+    RecordingRetrieveResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/SessionRecording"
+    UploadCreateParams:
+      type: object
+      required:
+        - file
+      properties:
+        file:
+          type: string
+          format: binary
+    UploadCreateResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message: { type: string }
+    SessionLiveURLs:
+      type: object
+      required:
+        - debuggerFullscreenUrl
+        - debuggerUrl
+        - wsUrl
+        - pages
+      properties:
+        debuggerFullscreenUrl: { type: string }
+        debuggerUrl: { type: string }
+        wsUrl: { type: string }
+        pages:
+          type: array
+          items:
+            $ref: "#/components/schemas/SessionLiveURLsPage"
+    SessionLiveURLsPage:
+      type: object
+      required:
+        - id
+        - debuggerFullscreenUrl
+        - debuggerUrl
+        - faviconUrl
+        - title
+        - url
+      properties:
+        id: { type: string }
+        debuggerFullscreenUrl: { type: string }
+        debuggerUrl: { type: string }
+        faviconUrl: { type: string }
+        title: { type: string }
+        url: { type: string }
