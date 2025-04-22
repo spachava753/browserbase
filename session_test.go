@@ -26,7 +26,7 @@ func testClientAndProjectID(t *testing.T) (*Client, string) {
 		t.Fatal("BB_PROJECT_ID environment variable not set")
 	}
 
-	sec := envAPIKeySource{key: apiKey}
+	sec := &EnvAPIKeySource{APIKey: apiKey}
 	client, err := NewClient("https://api.browserbase.com", sec)
 	if err != nil {
 		t.Fatalf("failed to create client: %v", err)
